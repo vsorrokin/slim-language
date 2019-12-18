@@ -5,55 +5,333 @@
 'name': 'Slim'
 'patterns': [
   {
-    'include': '#embedded-engine-css'
+    'comment': 'Doctype declaration.'
+    'match': '^(!!!|doctype)(\\s*[a-zA-Z0-9-_]+)?'
+    'name': 'comment.other.doctype.jade'
   }
   {
-    'include': '#embedded-engine-sass'
+    'begin': '^(\\s*)//-'
+    'comment': 'Unbuffered (jade-only) comments.'
+    'end': '^(?!(\\1\\s)|\\s*$)'
+    'name': 'comment.unbuffered.block.jade'
   }
   {
-    'include': '#embedded-engine-stylus'
+    'begin': '^(\\s*)//'
+    'comment': 'Buffered (html) comments.'
+    'end': '^(?!(\\1\\s)|\\s*$)'
+    'name': 'string.comment.buffered.block.jade'
+    'patterns': [
+      {
+        'captures':
+          '1':
+            'name': 'invalid.illegal.comment.comment.block.jade'
+        'comment': 'Buffered comments inside buffered comments will generate invalid html.'
+        'match': '^\\s*(//)(?!-)'
+        'name': 'string.comment.buffered.block.jade'
+      }
+    ]
   }
   {
-    'include': '#embedded-engine-scss'
+    'begin': '^(\\s*)(script)((\\.$)|(?=[.#(].*\\.$))'
+    'beginCaptures':
+      '2':
+        'name': 'entity.name.tag.script.jade'
+    'comment': 'Script tag with JavaScript code.'
+    'end': '^(?!(\\1\\s)|\\s*$)'
+    'name': 'source.script.jade'
+    'patterns': [
+      {
+        'begin': '\\G(?=\\()'
+        'end': '$'
+        'name': 'stuff.tag.script.jade'
+        'patterns': [
+          {
+            'include': '#tag_attributes'
+          }
+        ]
+      }
+      {
+        'begin': '\\G(?=[.#])'
+        'end': '$'
+        'name': 'stuff.tag.script.jade'
+        'patterns': [
+          {
+            'include': '#complete_tag'
+          }
+        ]
+      }
+      {
+        'include': 'source.js'
+      }
+    ]
   }
   {
-    'include': '#embedded-engine-coffee'
+    'begin': '^(\\s*)(style)((\\.$)|(?=[.#(].*\\.$))'
+    'beginCaptures':
+      '2':
+        'name': 'entity.name.tag.style.jade'
+    'comment': 'Style tag with CSS code.'
+    'end': '^(?!(\\1\\s)|\\s*$)'
+    'name': 'source.style.jade'
+    'patterns': [
+      {
+        'begin': '\\G(?=\\()'
+        'end': '$'
+        'name': 'stuff.tag.style.jade'
+        'patterns': [
+          {
+            'include': '#tag_attributes'
+          }
+        ]
+      }
+      {
+        'begin': '\\G(?=[.#])'
+        'end': '$'
+        'name': 'stuff.tag.style.jade'
+        'patterns': [
+          {
+            'include': '#complete_tag'
+          }
+        ]
+      }
+      {
+        'include': 'source.css'
+      }
+    ]
   }
   {
-    'include': '#embedded-engine-javascript'
+    'begin': '^(\\s*):(markdown)(?=\\(|$)$'
+    'beginCaptures':
+      '2':
+        'name': 'constant.language.name.markdown.filter.jade'
+    'end': '^(?!(\\1\\s)|\\s*$)'
+    'name': 'text.markdown.filter.jade'
+    'patterns': [
+      {
+        'include': '#filter_args'
+      }
+      {
+        'include': 'text.html.markdown'
+      }
+    ]
   }
   {
-    'include': '#slim-block-comment'
+    'begin': '^(\\s*):(sass)(?=\\(|$)$'
+    'beginCaptures':
+      '2':
+        'name': 'constant.language.name.sass.filter.jade'
+    'end': '^(?!(\\1\\s)|\\s*$)'
+    'name': 'source.sass.filter.jade'
+    'patterns': [
+      {
+        'include': '#filter_args'
+      }
+      {
+        'include': 'source.sass'
+      }
+    ]
   }
   {
-    'include': '#slim-line-comment'
+    'begin': '^(\\s*):(less)(?=\\(|$)$'
+    'beginCaptures':
+      '2':
+        'name': 'constant.language.name.less.filter.jade'
+    'end': '^(?!(\\1\\s)|\\s*$)'
+    'name': 'source.less.filter.jade'
+    'patterns': [
+      {
+        'include': '#filter_args'
+      }
+      {
+        'include': 'source.less'
+      }
+    ]
   }
   {
-    'include': '#slim-escaped-content'
+    'begin': '^(\\s*):(stylus)(?=\\(|$)$'
+    'beginCaptures':
+      '2':
+        'name': 'constant.language.name.stylus.filter.jade'
+    'end': '^(?!(\\1\\s)|\\s*$)'
+    'name': 'source.stylus.filter.jade'
+    'patterns': [
+      {
+        'include': '#filter_args'
+      }
+      {
+        'include': 'source.stylus'
+      }
+    ]
   }
   {
-    'include': '#ruby-logic'
+    'begin': '^(\\s*):(coffee(-?script)?)(?=\\(|$)'
+    'beginCaptures':
+      '2':
+        'name': 'constant.language.name.coffeescript.filter.jade'
+    'end': '^(?!(\\1\\s)|\\s*$)'
+    'name': 'source.coffeescript.filter.jade'
+    'patterns': [
+      {
+        'include': '#filter_args'
+      }
+      {
+        'include': 'source.coffee'
+      }
+    ]
   }
   {
-    'include': '#ruby-content'
+    'begin': '^(\\s*)((:(?=.))|(:$))'
+    'beginCaptures':
+      '4':
+        'name': 'invalid.illegal.empty.generic.filter.jade'
+    'comment': 'Generic Jade filter.'
+    'end': '^(?!(\\1\\s)|\\s*$)'
+    'name': 'text.generic.filter.jade'
+    'patterns': [
+      {
+        'begin': '\\G(?<=:)(?=.)'
+        'end': '$'
+        'name': 'name.generic.filter.jade'
+        'patterns': [
+          {
+            'match': '\\G\\('
+            'name': 'invalid.illegal.name.generic.filter.jade'
+          }
+          {
+            'match': '\\w'
+            'name': 'constant.language.name.generic.filter.jade'
+          }
+          {
+            'include': '#filter_args'
+          }
+          {
+            'match': '\\W'
+            'name': 'invalid.illegal.name.generic.filter.jade'
+          }
+        ]
+      }
+    ]
   }
   {
-    'include': '#ruby-embedded'
+    'begin': '^(\\s*)(?=[\\w.#].*?\\.$)(?=(?:(?:(?:(?:(?:#[\\w-]+)|(?:\\.[\\w-]+))|(?:(?:[#!]\\{[^}]*\\})|(?:\\w(?:(?:[\\w:-]+[\\w-])|(?:[\\w-]*)))))(?:(?:#[\\w-]+)|(?:\\.[\\w-]+)|(?:\\((?:[^()\\\'\\"]*(?:(?:\\\'(?:[^\\\']|(?:(?<!\\\\)\\\\\\\'))*\\\')|(?:\\"(?:[^\\"]|(?:(?<!\\\\)\\\\\\"))*\\")))*[^()]*\\))*)*)(?:(?:(?::\\s+)|(?<=\\)))(?:(?:(?:(?:#[\\w-]+)|(?:\\.[\\w-]+))|(?:(?:[#!]\\{[^}]*\\})|(?:\\w(?:(?:[\\w:-]+[\\w-])|(?:[\\w-]*)))))(?:(?:#[\\w-]+)|(?:\\.[\\w-]+)|(?:\\((?:[^()\\\'\\"]*(?:(?:\\\'(?:[^\\\']|(?:(?<!\\\\)\\\\\\\'))*\\\')|(?:\\"(?:[^\\"]|(?:(?<!\\\\)\\\\\\"))*\\")))*[^()]*\\))*)*))*)\\.$)(?:(?:(#[\\w-]+)|(\\.[\\w-]+))|((?:[#!]\\{[^}]*\\})|(?:\\w(?:(?:[\\w:-]+[\\w-])|(?:[\\w-]*)))))'
+    'beginCaptures':
+      '2':
+        'name': 'constant.id.tag.jade'
+      '3':
+        'name': 'constant.language.js'
+      '4':
+        'name': 'entity.name.tag.jade'
+    'comment': 'Generated from dot_block_tag.py'
+    'end': '^(?!(\\1\\s)|\\s*$)'
+    'name': 'text.block.dot.tag.jade'
+    'patterns': [
+      {
+        'include': '#tag_attributes'
+      }
+      {
+        'include': '#complete_tag'
+      }
+      {
+        'begin': '^(?=.)'
+        'end': '$'
+        'name': 'text.block.jade'
+        'patterns': [
+          {
+            'include': '#inline_jade'
+          }
+          {
+            'include': '#embedded_html'
+          }
+          {
+            'include': '#html_entity'
+          }
+          {
+            'include': '#interpolated_value'
+          }
+          {
+            'include': '#interpolated_error'
+          }
+        ]
+      }
+    ]
   }
   {
-    'include': '#tag-unenclosed'
-  }
-  {
-    'include': '#tag-enclosed-1'
-  }
-  {
-    'include': '#tag-enclosed-2'
-  }
-  {
-    'include': '#tag-enclosed-3'
-  }
-  {
-    'include': '#illegal'
+    'begin': '^\\s*+(?=[^/])'
+    'comment': 'All constructs that generally span a single line starting with any number of white-spaces.'
+    'end': '$'
+    'name': 'tag.jade'
+    'patterns': [
+      {
+        'include': '#inline_jade'
+      }
+      {
+        'include': '#blocks_and_includes'
+      }
+      {
+        'include': '#unbuffered_code'
+      }
+      {
+        'include': '#mixins'
+      }
+      {
+        'include': '#flow_control'
+      }
+      {
+        'include': '#case_conds'
+      }
+      {
+        'begin': '\\|'
+        'comment': 'Tag pipe text line.'
+        'end': '$'
+        'name': 'text.block.pipe.jade'
+        'patterns': [
+          {
+            'include': '#inline_jade'
+          }
+          {
+            'include': '#embedded_html'
+          }
+          {
+            'include': '#html_entity'
+          }
+          {
+            'include': '#interpolated_value'
+          }
+          {
+            'include': '#interpolated_error'
+          }
+        ]
+      }
+      {
+        'include': '#printed_expression'
+      }
+      {
+        'begin': '\\G((?=<)|[^\\w.#]|(\\.[^\\w-]))|(#[^\\{\\w-])'
+        'comment': 'Line starting with characters incompatible with tag name/id/class is standalone text.'
+        'end': '$'
+        'name': 'text.jade'
+        'patterns': [
+          {
+            'include': '#inline_jade'
+          }
+          {
+            'include': '#embedded_html'
+          }
+          {
+            'include': '#html_entity'
+          }
+          {
+            'include': '#interpolated_value'
+          }
+          {
+            'include': '#interpolated_error'
+          }
+        ]
+      }
+      {
+        'include': '#complete_tag'
+      }
+    ]
   }
 ]
 'repository':
