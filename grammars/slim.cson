@@ -1,5 +1,6 @@
 'fileTypes': [
-  'slim'
+  'slim',
+  'vue'
 ]
 'name': 'Slim'
 'patterns': [
